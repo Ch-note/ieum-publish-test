@@ -60,30 +60,63 @@ function Meeting() {
   ]);
   const [aiInput, setAiInput] = useState("");
 
-  // --- [1] WebSocket 연결 (상태 모니터링) ---
+  // --- [1] 백엔드 예열 (Warm-up) 및 WebSocket 연결 ---
   useEffect(() => {
+    let reconnectTimer;
+
+    // ACA 컨테이너를 깨우기 위한 가벼운 HTTP 요청
+    const warmupBackend = async () => {
+      try {
+        console.log("🔥 Warming up Whisper Backend...");
+        setBackendStatus("loading");
+        await axios.get(`${WHISPER_BACKEND_URL}/status`, { timeout: 5000 });
+      } catch (e) {
+        console.log("📡 Backend is starting up or unreachable yet.");
+      }
+    };
+
     const connectSocket = () => {
+      if (socketRef.current?.readyState === WebSocket.OPEN) return;
+
+      console.log(`🔌 Attempting connection to: ${WHISPER_WS_URL}`);
       const socket = new WebSocket(WHISPER_WS_URL);
+
       socket.onopen = () => {
-        console.log("🔌 Whisper WebSocket Connected");
+        console.log("✅ Whisper WebSocket Connected");
         setBackendStatus("connected");
       };
+
       socket.onmessage = (event) => {
-        const data = JSON.parse(event.data);
-        if (data.type === "status") {
-          setBackendStatus(data.value);
+        try {
+          const data = JSON.parse(event.data);
+          if (data.type === "status") {
+            setBackendStatus(data.value);
+          }
+        } catch (e) {
+          console.error("Failed to parse WS message:", e);
         }
       };
+
       socket.onclose = () => {
-        console.log("🔌 Whisper WebSocket Disconnected. Retrying in 3s...");
+        console.log("🔌 Whisper WebSocket Disconnected. Retrying in 5s...");
         setBackendStatus("disconnected");
-        setTimeout(connectSocket, 3000);
+        reconnectTimer = setTimeout(connectSocket, 5000);
       };
+
+      socket.onerror = (err) => {
+        console.error("❌ WebSocket Error:", err);
+        socket.close();
+      };
+
       socketRef.current = socket;
     };
 
-    connectSocket();
-    return () => socketRef.current?.close();
+    warmupBackend().then(connectSocket);
+
+    return () => {
+      if (reconnectTimer) clearTimeout(reconnectTimer);
+      socketRef.current?.close();
+    };
   }, []);
 
   // --- [2] 오디오 청크를 서버로 전송하는 함수 ---
