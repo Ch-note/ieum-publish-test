@@ -1,0 +1,11 @@
+azure-functions
+fastapi
+uvicorn
+pydantic
+openai
+azure-search-documents
+azure-core
+httpx
+python-dotenv
+requests
+langchain-openai

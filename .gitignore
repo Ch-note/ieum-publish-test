@@ -1,0 +1,21 @@
+# .gitignore
+
+# 1. 보안 파일 (절대 올리면 안 됨!)
+.env
+Backend/.env
+*.pem
+*.key
+token_cache.bin
+
+# 2. 파이썬 쓰레기
+__pycache__/
+*.py[cod]
+backend/venv/
+backend/.venv/
+
+# 3. 노드 쓰레기 (프론트엔드)
+node_modules/
+ieum-final\ieum-code\src\.env
+dist/
+build/
+.DS_Store
