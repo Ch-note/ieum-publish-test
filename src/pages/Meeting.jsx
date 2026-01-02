@@ -270,12 +270,17 @@ function Meeting() {
       try {
         console.log("👋 Sending Shutdown signal to Whisper Backend...");
         await axios.post(`${WHISPER_BACKEND_URL}/shutdown`);
-        alert("시스템이 종료되었습니다. 창을 닫으셔도 됩니다.");
-        setFlowState("idle");
-        navigate("/");
+        alert("시스템 종료 요청이 전달되었습니다. 곧 결과 페이지로 이동합니다.");
+
+        // 회의가 완료된 상태라면 결과 페이지로, 아니면 대시보드로 이동
+        if (flowState === "completed") {
+          navigate("/result");
+        } else {
+          navigate("/home");
+        }
       } catch (error) {
         console.error("❌ Shutdown failed:", error);
-        navigate("/");
+        navigate("/home");
       }
     }
   };
