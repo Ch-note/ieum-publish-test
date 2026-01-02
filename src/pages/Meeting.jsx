@@ -29,6 +29,7 @@ function Meeting() {
   const {
     currentMeeting,
     isRecording,
+    setIsRecording, // 추가됨
     recordingTime,
     setRecordingTime,
     stopRecording,
