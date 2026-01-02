@@ -69,7 +69,8 @@ function Meeting() {
       try {
         console.log("🔥 Warming up Whisper Backend...");
         setBackendStatus("loading");
-        await axios.get(`${WHISPER_BACKEND_URL}/status`, { timeout: 5000 });
+        // /status 엔드포인트 (백엔드 main.py에 추가됨)
+        await axios.get(`${WHISPER_BACKEND_URL}/status`, { timeout: 10000 });
       } catch (e) {
         console.log("📡 Backend is starting up or unreachable yet.");
       }
@@ -173,8 +174,10 @@ function Meeting() {
         }, 30000);
       })
       .catch((err) => {
-        console.error("❌ 미이크 접근 권한 오류:", err);
+        console.error("❌ 마이크 접근 권한 오류:", err);
         setIsRecording(false);
+        setFlowState("idle"); // 상태 복구
+        alert("마이크 접근 권한이 필요합니다. 브라우저 설정에서 권한을 허용해 주세요.");
       });
 
     return () => {

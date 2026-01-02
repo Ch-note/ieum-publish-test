@@ -78,6 +78,10 @@ class TodoRequest(BaseModel):
     content: str = None
     due_date: str = None
 
+@app.get("/")
+async def health_check():
+    return {"status": "ok", "service": "ieum-main-api"}
+
 # ===========================
 # API 엔드포인트
 # ===========================
